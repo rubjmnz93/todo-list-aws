@@ -1,9 +1,10 @@
+import functools
+import json
 import os
-import boto3
 import time
 import uuid
-import json
-import functools
+
+import boto3
 from botocore.exceptions import ClientError
 
 
@@ -15,7 +16,7 @@ def get_table(dynamodb=None):
             boto3.client = functools.partial(boto3.client, endpoint_url=URL)
             boto3.resource = functools.partial(boto3.resource,
                                                endpoint_url=URL)
-        dynamodb = boto3.resource("dynamodb-dbdbdb")
+        dynamodb = boto3.resource("dynamodb")
     # fetch todo from the database
     table = dynamodb.Table(os.environ['DYNAMODB_TABLE'])
     return table
