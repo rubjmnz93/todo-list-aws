@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source todo-list-aws/bin/activate
+source .venv/bin/activate
 set -x
 
 RAD_ERRORS=$(radon cc src -nc | wc -l)
