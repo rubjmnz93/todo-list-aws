@@ -65,6 +65,8 @@ pipeline {
 
                         git fetch origin
 
+                        git config merge.ours.driver true
+
                         git checkout master
                         git reset --hard origin/master
 
