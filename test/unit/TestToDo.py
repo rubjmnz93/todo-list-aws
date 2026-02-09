@@ -1,13 +1,14 @@
 # from pprint import pprint
-import warnings
-import unittest
-import boto3
-from moto import mock_dynamodb2
-import sys
-import os
 import json
+import os
+import unittest
+import warnings
 
-@mock_dynamodb2
+import boto3
+from moto import mock_aws
+
+
+@mock_aws
 class TestDatabaseFunctions(unittest.TestCase):
     def setUp(self):
         print ('---------------------')
@@ -52,7 +53,7 @@ class TestDatabaseFunctions(unittest.TestCase):
         #self.assertTrue(self.table_local)  # check if we got a result
 
         print('Table name:' + self.table.name)
-        tableName = os.environ['DYNAMODB_TABLE'];
+        tableName = os.environ['DYNAMODB_TABLE']
         # check if the table name is 'ToDo'
         self.assertIn(tableName, self.table.name)
         #self.assertIn('todoTable', self.table_local.name)
@@ -86,8 +87,7 @@ class TestDatabaseFunctions(unittest.TestCase):
     def test_get_todo(self):
         print ('---------------------')
         print ('Start: test_get_todo')
-        from src.todoList import get_item
-        from src.todoList import put_item
+        from src.todoList import get_item, put_item
 
         # Testing file functions
         # Table mock
@@ -108,8 +108,7 @@ class TestDatabaseFunctions(unittest.TestCase):
     def test_list_todo(self):
         print ('---------------------')
         print ('Start: test_list_todo')
-        from src.todoList import put_item
-        from src.todoList import get_items
+        from src.todoList import get_items, put_item
 
         # Testing file functions
         # Table mock
@@ -124,9 +123,7 @@ class TestDatabaseFunctions(unittest.TestCase):
     def test_update_todo(self):
         print ('---------------------')
         print ('Start: test_update_todo')
-        from src.todoList import put_item
-        from src.todoList import update_item
-        from src.todoList import get_item
+        from src.todoList import put_item, update_item
         updated_text = "Aprender más cosas que DevOps y Cloud en la UNIR"
         # Testing file functions
         # Table mock
@@ -145,8 +142,7 @@ class TestDatabaseFunctions(unittest.TestCase):
     def test_update_todo_error(self):
         print ('---------------------')
         print ('Start: atest_update_todo_error')
-        from src.todoList import put_item
-        from src.todoList import update_item
+        from src.todoList import put_item, update_item
         updated_text = "Aprender más cosas que DevOps y Cloud en la UNIR"
         # Testing file functions
         # Table mock
@@ -178,9 +174,7 @@ class TestDatabaseFunctions(unittest.TestCase):
     def test_delete_todo(self):
         print ('---------------------')
         print ('Start: test_delete_todo')
-        from src.todoList import delete_item
-        from src.todoList import put_item
-        from src.todoList import get_items
+        from src.todoList import delete_item, get_items, put_item
         # Testing file functions
         # Table mock
         responsePut = put_item(self.text, self.dynamodb)
