@@ -36,6 +36,7 @@ pipeline {
                 } 
             }
         }
+    }
     post { 
         always { 
             echo 'Clean env: delete dir'
