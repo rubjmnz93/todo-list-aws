@@ -57,6 +57,25 @@ pipeline {
                    
             }
         }
+        stage('Merge'){
+            steps{
+                sshagent(['github']) {
+                    sh '''
+                        set -eux
+
+                        git fetch origin
+
+                        git checkout master
+                        git reset --hard origin/master
+
+                        git merge origin/develop --no-ff -m "Auto merge develop -> master [CI]"
+
+                        git push origin master
+                    '''
+                }
+
+            }
+        }
     }
     post { 
         always { 
