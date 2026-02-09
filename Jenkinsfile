@@ -2,35 +2,15 @@ pipeline {
     agent any
 
     environment {
-        ENVIRONMENT = 'staging'
+        ENVIRONMENT = 'production'
     }
-
 
     stages {
         
         stage('SetUp'){
             steps{
                 echo 'Setup Virtualenv for testing'
-                sh "bash pipelines/PIPELINE-FULL-STAGING/setup.sh"
-            }
-        }
-        stage('Test'){
-            steps{
-                echo 'Static program analysis:'
-                sh "bash pipelines/PIPELINE-FULL-STAGING/static_test.sh"
-                echo 'Unit testing:'
-                sh "bash pipelines/PIPELINE-FULL-STAGING/unit_test.sh"
-            }
-            post {
-                always {
-                    script {
-                        def failed = publishCoverage (failUnhealthy: true, 
-                            globalThresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 70.0]],
-                            adapters: [coberturaAdapter(
-                                mergeToOneReport: true, 
-                                path: '**/coverage.xml')])
-                    }
-                }
+                sh "bash pipelines/PIPELINE-FULL-PRODUCTION/setup.sh"
             }
         }
        stage('Build') {
@@ -53,30 +33,9 @@ pipeline {
                     echo "$BASE_URL"
                     echo 'Initiating Integration Tests'
                     sh "bash pipelines/common-steps/integration.sh $BASE_URL"
-                }
-                   
+                } 
             }
         }
-        stage('Merge'){
-            steps{
-                sshagent(['github']) {
-                    sh '''
-                        set -eux
-
-                        git fetch origin
-
-                        git checkout master
-                        git reset --hard origin/master
-
-                        git merge origin/develop --no-ff -m "Auto merge develop -> master [CI]"
-
-                        git push origin master
-                    '''
-                }
-
-            }
-        }
-    }
     post { 
         always { 
             echo 'Clean env: delete dir'
