@@ -69,7 +69,7 @@ pipeline {
 
                         git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/rubjmnz93/todo-list-aws.git
 
-                        git fetch origin
+                        git fetch origin master:master
 
                         git config merge.ours.driver true
 
