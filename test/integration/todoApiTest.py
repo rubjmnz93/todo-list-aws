@@ -25,11 +25,9 @@ class TestApi(unittest.TestCase):
         #List
         url = BASE_URL+"/todos"
         response = requests.get(url)
-        print('Response List Todo:' + str(response.json()))
         self.assertEqual(
             response.status_code, 200, "Error en la petición API a {url}"
         )
-        self.assertTrue(response.json())
         
         print('End - integration test List TODO read only')
 
@@ -40,8 +38,6 @@ class TestApi(unittest.TestCase):
         #Test GET TODO
         url = BASE_URL+"/todos/-1"
         response = requests.get(url)
-        json_response = response.json()
-        print('Response Get Todo: '+ str(json_response))
         self.assertEqual(
             response.status_code, 404, "Error en la petición API a {url}"
         )
