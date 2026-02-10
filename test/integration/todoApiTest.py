@@ -1,11 +1,9 @@
-import http.client
+import json
 import os
 import unittest
-from urllib.request import urlopen
-import requests
-import json
 
 import pytest
+import requests
 
 BASE_URL = os.environ.get("BASE_URL")
 #BASE_URL = "https://m0qwfec693.execute-api.us-east-1.amazonaws.com/Prod"
@@ -15,9 +13,39 @@ DEFAULT_TIMEOUT = 2  # in secs
 @pytest.mark.api
 class TestApi(unittest.TestCase):
     
+    @pytest.mark.readonly
     def setUp(self):
         self.assertIsNotNone(BASE_URL, "URL no configurada")
         self.assertTrue(len(BASE_URL) > 8, "URL no configurada")
+
+    @pytest.mark.readonly
+    def test_api_listtodos_readonly(self):
+        print('---------------------------------------')
+        print('Starting - integration test List TODO read only')
+        #List
+        url = BASE_URL+"/todos"
+        response = requests.get(url)
+        print('Response List Todo:' + str(response.json()))
+        self.assertEqual(
+            response.status_code, 200, "Error en la petición API a {url}"
+        )
+        self.assertTrue(response.json())
+        
+        print('End - integration test List TODO read only')
+
+    @pytest.mark.readonly
+    def test_api_gettodo_readonly(self):
+        print('---------------------------------------')
+        print('Starting - integration test Get TODO read only')
+        #Test GET TODO
+        url = BASE_URL+"/todos/-1"
+        response = requests.get(url)
+        json_response = response.json()
+        print('Response Get Todo: '+ str(json_response))
+        self.assertEqual(
+            response.status_code, 404, "Error en la petición API a {url}"
+        )
+        print('End - integration test Get TODO read only')
 
     def test_api_listtodos(self):
         print('---------------------------------------')
@@ -49,6 +77,7 @@ class TestApi(unittest.TestCase):
         self.assertTrue(response.json())
         
         print('End - integration test List TODO')
+
     def test_api_addtodo(self):
         print('---------------------------------------')
         print('Starting - integration test Add TODO')
@@ -74,6 +103,7 @@ class TestApi(unittest.TestCase):
             response.status_code, 200, "Error en la petición API a {url}"
         )
         print('End - integration test Add TODO')
+
     def test_api_gettodo(self):
         print('---------------------------------------')
         print('Starting - integration test Get TODO')
@@ -165,6 +195,7 @@ class TestApi(unittest.TestCase):
             response.status_code, 200, "Error en la petición API a {url}"
         )
         print('End - integration test Update TODO')
+
     def test_api_deletetodo(self):
         print('---------------------------------------')
         print('Starting - integration test Delete TODO')
