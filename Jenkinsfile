@@ -73,8 +73,8 @@ pipeline {
 
                         git config merge.ours.driver true
 
-                        git checkout master
-                        git reset --hard origin/master
+                        git checkout -B master origin/master
+                        git clean -fd
 
                         git merge origin/develop --no-ff -m "Auto merge develop -> master [CI]"
 
