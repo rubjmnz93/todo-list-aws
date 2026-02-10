@@ -59,9 +59,15 @@ pipeline {
         }
         stage('Merge'){
             steps{
-                sshagent(['github']) {
+                withCredentials([usernamePassword(
+                    credentialsId: 'github-token',
+                    usernameVariable: 'GIT_USER',
+                    passwordVariable: 'GIT_TOKEN'
+                )]) {
                     sh '''
                         set -eux
+
+                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/rubjmnz93/todo-list-aws.git
 
                         git fetch origin
 
