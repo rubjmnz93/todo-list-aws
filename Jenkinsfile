@@ -14,7 +14,7 @@ pipeline {
                 sh "bash pipelines/PIPELINE-FULL-STAGING/setup.sh"
             }
         }
-        stage('Test'){
+        stage('Static Test'){
             steps{
                 echo 'Static program analysis:'
                 sh "bash pipelines/PIPELINE-FULL-STAGING/static_test.sh"
@@ -30,6 +30,9 @@ pipeline {
                                 mergeToOneReport: true, 
                                 path: '**/coverage.xml')])
                     }
+                    recordIssues tools: [flake8(pattern: 'flake8.out')]
+                    recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
+                    junit 'result-unit.xml'
                 }
             }
         }
@@ -41,23 +44,23 @@ pipeline {
         }
         stage('Deploy'){
             steps{
-                echo 'Initiating Deployment'
+                echo 'Initiating Deployment wit SAM'
                 sh "bash pipelines/common-steps/deploy.sh"
             }
         }
-        stage('Integration Test after deploy'){
+        stage('Rest Tests'){
             steps{
                 script {
                     def BASE_URL = sh( script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
                         returnStdout: true)
                     echo "$BASE_URL"
-                    echo 'Initiating Integration Tests'
+                    echo 'Initiating Rest Tests after deployment'
                     sh "bash pipelines/common-steps/integration.sh $BASE_URL"
                 }
                    
             }
         }
-        stage('Merge'){
+        stage('Promote'){
             steps{
                 withCredentials([usernamePassword(
                     credentialsId: 'github-token',
@@ -71,14 +74,19 @@ pipeline {
 
                         git fetch origin master:master
 
+                        # Avoid merge conflicts with Jenkins file in master branch
                         git config merge.ours.driver true
 
                         git checkout master
                         git clean -fd
 
-                        git merge origin/develop --no-ff -m "Auto merge develop -> master [CI]"
+                        git merge origin/develop --no-ff -m "Auto promote develop -> master [CI]"
 
-                        git push origin master
+                        # create an annotated tag for this release (timestamp based)
+                        TAG="release-$(date -u +%Y%m%dT%H%M%SZ)"
+                        git tag -a "$TAG" -m "Release $TAG"
+
+                        git push origin master --tags
                     '''
                 }
 
