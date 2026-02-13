@@ -17,12 +17,12 @@ then
     exit 1
 fi
 
-flake8 src/*.py
+flake8 src/*.py > flake8.out
 if [[ $? -ne 0 ]]
 then
     exit 1
 fi
-bandit src/*.py
+bandit src/*.py -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" 
 if [[ $? -ne 0 ]]
 then
     exit 1
