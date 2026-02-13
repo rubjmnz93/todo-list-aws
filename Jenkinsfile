@@ -59,6 +59,11 @@ pipeline {
                 }
                    
             }
+            post {
+                always {
+                    junit 'result-integration.xml'
+                }
+            }
         }
         stage('Promote'){
             steps{
