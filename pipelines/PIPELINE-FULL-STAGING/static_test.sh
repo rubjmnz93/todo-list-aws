@@ -22,7 +22,7 @@ if [[ $? -ne 0 ]]
 then
     exit 1
 fi
-bandit src/*.py -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" 
+bandit src/*.py -f custom -o bandit.out --msg-template "{abspath}:{line}: [{test_id}] {msg}" 
 if [[ $? -ne 0 ]]
 then
     exit 1
