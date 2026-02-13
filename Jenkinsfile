@@ -87,8 +87,9 @@ pipeline {
 
                         git merge origin/develop --no-ff -m "Auto promote develop -> master [CI]"
 
-                        # create an annotated tag for this release 
-                        git tag -a "release" -m "Release"
+                        # create an annotated tag for this release (timestamp based)
+                        TAG="release-$(date -u +%Y%m%dT%H%M%SZ)"
+                        git tag -a "$TAG" -m "Release $TAG"
 
                         git push origin master --tags
                     '''
