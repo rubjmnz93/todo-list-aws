@@ -8,14 +8,14 @@ pipeline {
         GIT_REPO_URL = 'https://github.com/rubjmnz93/todo-list-aws.git'
     }
 
-    stage('Get Code') {
-        steps {
-            echo 'Checkout code from GitHub'
-            git url: "${GIT_REPO_URL}", branch: 'develop' 
-        }
-    }
-
     stages {
+
+        stage('Get Code') {
+            steps {
+                echo 'Checkout code from GitHub'
+                git url: "${GIT_REPO_URL}", branch: 'develop' 
+            }
+        }
         
         stage('SetUp'){
             steps{
