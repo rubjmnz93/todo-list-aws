@@ -13,7 +13,7 @@ pipeline {
         stage('Get Code') {
             steps {
                 echo 'Checkout code from GitHub'
-                git url: "https://${GIT_REPO_URL}", branch: 'refs/tags/release' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y el tag de release
+                git url: "https://${GIT_REPO_URL}", branch: 'master' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y el tag de release
             }
         }
         
