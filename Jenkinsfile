@@ -84,7 +84,7 @@ pipeline {
                     sh '''
                         set -eux
 
-                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/${GITHUB_REPO}.git
+                        git remote set-url origin ${GIT_REPO_URL.replace('https://', 'https://${GIT_USER}:${GIT_TOKEN}@')}
 
                         git fetch origin master:master
 
