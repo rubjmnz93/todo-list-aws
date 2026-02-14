@@ -5,7 +5,7 @@ pipeline {
 
     environment {
         ENVIRONMENT = 'staging'
-        GIT_REPO_URL = 'https://github.com/rubjmnz93/todo-list-aws.git'
+        GIT_REPO_URL = 'github.com/rubjmnz93/todo-list-aws.git'
     }
 
     stages {
@@ -13,7 +13,7 @@ pipeline {
         stage('Get Code') {
             steps {
                 echo 'Checkout code from GitHub'
-                git url: "${GIT_REPO_URL}", branch: 'develop' 
+                git url: "https://${GIT_REPO_URL}", branch: 'develop' 
             }
         }
         
@@ -84,7 +84,7 @@ pipeline {
                     sh '''
                         set -eux
 
-                        git remote set-url origin ${GIT_REPO_URL.replace('https://', 'https://${GIT_USER}:${GIT_TOKEN}@')}
+                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@${GIT_REPO_URL}
 
                         git fetch origin master:master
 
