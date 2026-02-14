@@ -1,10 +1,19 @@
 pipeline {
     agent any
 
+    options { skipDefaultCheckout() }
+
     environment {
         ENVIRONMENT = 'staging'
+        GITHUB_REPO = 'rubjmnz93/todo-list-aws'
     }
 
+    stage('Get Code') {
+        steps {
+            echo 'Checkout code from GitHub'
+            sh "git clone --branch=develop https://github.com/${GITHUB_REPO}.git" 
+        }
+    }
 
     stages {
         
@@ -75,7 +84,7 @@ pipeline {
                     sh '''
                         set -eux
 
-                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/rubjmnz93/todo-list-aws.git
+                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@github.com/${GITHUB_REPO}.git
 
                         git fetch origin master:master
 
