@@ -1,11 +1,11 @@
 pipeline {
-    agent any
+    agent any // usar cualquier agente disponible para ejecutar la pipeline
 
-    options { skipDefaultCheckout() }
+    options { skipDefaultCheckout() } // Evitar el checkout automático del código al inicio de la pipeline
 
-    environment {
-        ENVIRONMENT = 'staging'
-        GIT_REPO_URL = 'github.com/rubjmnz93/todo-list-aws.git'
+    environment { // Definir variables de entorno para toda la pipeline
+        ENVIRONMENT = 'staging' // Variable de entorno para indicar el entorno de despliegue
+        GIT_REPO_URL = 'github.com/rubjmnz93/todo-list-aws.git' // URL del repositorio Git, configurada como variable de entorno en Jenkins para mayor flexibilidad
     }
 
     stages {
@@ -13,94 +13,92 @@ pipeline {
         stage('Get Code') {
             steps {
                 echo 'Checkout code from GitHub'
-                git url: "https://${GIT_REPO_URL}", branch: 'develop' 
+                git url: "https://${GIT_REPO_URL}", branch: 'develop' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y la rama especificadas
             }
         }
         
         stage('SetUp'){
             steps{
                 echo 'Setup Virtualenv for testing'
-                sh "bash pipelines/PIPELINE-FULL-STAGING/setup.sh"
+                sh "bash pipelines/PIPELINE-FULL-STAGING/setup.sh" // Ejecutar el script de configuración para preparar el entorno de pruebas, como la creación de un entorno virtual y la instalación de dependencias
             }
         }
         stage('Static Test'){
             steps{
                 echo 'Static program analysis:'
-                sh "bash pipelines/PIPELINE-FULL-STAGING/static_test.sh"
+                sh "bash pipelines/PIPELINE-FULL-STAGING/static_test.sh" // Ejecutar el script de análisis estático para revisar el código en busca de errores, vulnerabilidades o problemas de estilo utilizando flake8 para el análisis de estilo, Bandit para el análisis de seguridad y Radon para la complejidad ciclomática y el índice de mantenibilidad. Los resultados se guardan en flake8.out y bandit.out
                 echo 'Unit testing:'
-                sh "bash pipelines/PIPELINE-FULL-STAGING/unit_test.sh"
-            }
-            post {
-                always {
+                sh "bash pipelines/PIPELINE-FULL-STAGING/unit_test.sh" // Ejecutar el script de pruebas unitarias para ejecutar las pruebas definidas en el proyecto utilizando pytest, así como la cobertura del código. El resultado de las pruebas se guarda en result-unit.xml y el informe de cobertura se guarda en coverage.xml
+            post { // En la sección post de este stage, se publican los resultados del análisis estático, las pruebas unitarias y la cobertura del código utilizando los plugins correspondientes de Jenkins. Esto permite visualizar los resultados en el panel de Jenkins y marcar la construcción como fallida si no se cumplen los umbrales establecidos para la cobertura o si alguna prueba falla.
+                always { // La sección always garantiza que estos pasos se ejecuten independientemente del resultado de los pasos anteriores en este stage
                     script {
                         def failed = publishCoverage (failUnhealthy: true, 
                             globalThresholds: [[thresholdTarget: 'Line', unhealthyThreshold: 70.0]],
                             adapters: [coberturaAdapter(
                                 mergeToOneReport: true, 
                                 path: '**/coverage.xml')])
-                    }
-                    recordIssues tools: [flake8(pattern: 'flake8.out')]
-                    recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')]
-                    junit 'result-unit.xml'
+                    } // Publicar el informe de cobertura utilizando el plugin Cobertura, estableciendo un umbral de cobertura del 70% para marcar la construcción como no saludable si no se cumple. El informe se genera a partir de los archivos coverage.xml generados por pytest-cov
+                    recordIssues tools: [flake8(pattern: 'flake8.out')] // Publicar los resultados del análisis estático de flake8 utilizando el plugin Warnings Next Generation, buscando los archivos flake8.out generados por el script de análisis estático
+                    recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')] // Publicar los resultados del análisis estático de Bandit utilizando el plugin Warnings Next Generation, buscando los archivos bandit.out generados por el script de análisis estático
+                    junit 'result-unit.xml' // Publicar los resultados de las pruebas unitarias utilizando el plugin JUnit, buscando los archivos result-unit.xml generados por pytest. Esto permitirá visualizar los resultados de las pruebas en Jenkins y marcar la construcción como fallida si alguna prueba falla
                 }
             }
         }
-       stage('Build') {
+        stage('Build') {
             steps{
                 echo 'Package sam application:'
-                sh "bash pipelines/common-steps/build.sh"
+                sh "bash pipelines/common-steps/build.sh" // Ejecutar el script de construcción para empaquetar la aplicación utilizando AWS SAM, lo que prepara la aplicación para su despliegue posterior
             }
         }
         stage('Deploy'){
             steps{
                 echo 'Initiating Deployment wit SAM'
-                sh "bash pipelines/common-steps/deploy.sh"
+                sh "bash pipelines/common-steps/deploy.sh" // Ejecutar el script de despliegue para desplegar la aplicación utilizando AWS SAM, lo que implementa la aplicación en el entorno de staging de AWS
             }
         }
         stage('Rest Tests'){
             steps{
                 script {
                     def BASE_URL = sh( script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
-                        returnStdout: true)
-                    echo "$BASE_URL"
-                    echo 'Initiating Rest Tests after deployment'
-                    sh "bash pipelines/common-steps/integration.sh $BASE_URL"
+                        returnStdout: true) // Ejecutar un comando de AWS CLI para obtener la URL base de la API desplegada en AWS, utilizando el nombre del stack y la región especificados
+                    echo "$BASE_URL" // Imprimir la URL base obtenida
+                    echo 'Initiating Rest Tests after deployment' 
+                    sh "bash pipelines/common-steps/integration.sh $BASE_URL" // Ejecutar el script de pruebas de integración para realizar pruebas REST contra la API desplegada, pasando la URL base como argumento para que las pruebas puedan interactuar con la API correctamente. Los resultados de las pruebas se guardan en result-integration.xml para su posterior publicación en Jenkins
                 }
                    
             }
             post {
                 always {
-                    junit 'result-integration.xml'
-                }
+                    junit 'result-integration.xml' // Publicar los resultados de las pruebas de integración utilizando el plugin JUnit
             }
         }
         stage('Promote'){
             steps{
+                // Configurar las credenciales de GitHub
                 withCredentials([usernamePassword(
                     credentialsId: 'github-token',
                     usernameVariable: 'GIT_USER',
                     passwordVariable: 'GIT_TOKEN'
                 )]) {
                     sh '''
-                        set -eux
+                        set -e # Salir inmediatamente si algún comando falla para evitar que la pipeline continúe en caso de errores
 
-                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@${GIT_REPO_URL}
+                        git remote set-url origin https://${GIT_USER}:${GIT_TOKEN}@${GIT_REPO_URL} # Configurar la URL remota del repositorio Git para incluir las credenciales de autenticación
 
-                        git fetch origin master:master
+                        git fetch origin master:master # Obtener la última versión de la rama master desde el repositorio remoto para asegurarse de que se está trabajando con la versión más reciente antes de realizar el merge
 
-                        # Avoid merge conflicts with Jenkins file in master branch
-                        git config merge.ours.driver true
+                        git config merge.ours.driver true # Configurar la estrategia de merge "ours" para resolver automáticamente los conflictos a favor de la rama actual. Evita que se sobrescriba el fichero Jeninsfile con los cambios de la rama develop, manteniendo la configuración específica de la pipeline en master
 
-                        git checkout master
-                        git clean -fd
+                        git checkout master # Cambiar a la rama master para preparar el merge de los cambios desde develop
+                        git clean -fd # Limpiar el directorio de trabajo eliminando archivos no rastreados y directorios para evitar conflictos durante el merge
 
-                        git merge origin/develop --no-ff -m "Auto promote develop -> master [CI]"
+                        git merge origin/develop --no-ff -m "Auto promote develop -> master [CI]" # Realizar el merge de la rama develop en master
 
-                        # create an annotated tag for this release
-                        TAG="release"
+                        # Crear un tage "release" en master
+                        TAG="release" 
                         git tag -af "$TAG" -m "Release version"
 
-                        git push -f origin master --tags
+                        git push -f origin master --tags # Forzar el push con los cambios a la rama master con el tag
                     '''
                 }
 
@@ -110,7 +108,7 @@ pipeline {
     post { 
         always { 
             echo 'Clean env: delete dir'
-            cleanWs()
+            cleanWs() // Limpiar el espacio de trabajo después de la ejecución del pipeline
         }
     }
 }
