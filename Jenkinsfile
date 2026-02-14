@@ -49,6 +49,7 @@ pipeline {
             post {
                 always {
                     junit 'result-integration.xml' // Publicar los resultados de las pruebas de integración utilizando el plugin JUnit
+                }
             }
         }
     }
