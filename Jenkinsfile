@@ -89,10 +89,9 @@ pipeline {
 
                         # create an annotated tag for this release
                         TAG="release"
-                        git tag -d "$TAG"
-                        git tag -a "$TAG" -m "Release version"
+                        git tag -af "$TAG" -m "Release version"
 
-                        git push origin master --tags
+                        git push -f origin master --tags
                     '''
                 }
 
