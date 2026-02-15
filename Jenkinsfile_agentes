@@ -41,6 +41,7 @@ pipeline {
                 sh "bash pipelines/PIPELINE-FULL-STAGING/static_test.sh" // Ejecutar el script de análisis estático para revisar el código en busca de errores, vulnerabilidades o problemas de estilo utilizando flake8 para el análisis de estilo, Bandit para el análisis de seguridad y Radon para la complejidad ciclomática y el índice de mantenibilidad. Los resultados se guardan en flake8.out y bandit.out
                 echo 'Unit testing:'
                 sh "bash pipelines/PIPELINE-FULL-STAGING/unit_test.sh" // Ejecutar el script de pruebas unitarias para ejecutar las pruebas definidas en el proyecto utilizando pytest, así como la cobertura del código. El resultado de las pruebas se guarda en result-unit.xml y el informe de cobertura se guarda en coverage.xml
+            }
             post { // En la sección post de este stage, se publican los resultados del análisis estático, las pruebas unitarias y la cobertura del código utilizando los plugins correspondientes de Jenkins. Esto permite visualizar los resultados en el panel de Jenkins y marcar la construcción como fallida si no se cumplen los umbrales establecidos para la cobertura o si alguna prueba falla.
                 always { // La sección always garantiza que estos pasos se ejecuten independientemente del resultado de los pasos anteriores en este stage
                     script {
@@ -98,6 +99,7 @@ pipeline {
             post {
                 always {
                     junit 'result-integration.xml' // Publicar los resultados de las pruebas de integración utilizando el plugin JUnit
+                }
             }
         }
         stage('Promote'){
