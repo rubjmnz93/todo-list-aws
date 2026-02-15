@@ -17,7 +17,7 @@ pipeline {
                 echo WORKSPACE
                 echo NODE_NAME
                 echo 'Checkout code from GitHub'
-                git url: "https://${GIT_REPO_URL}", branch: 'develop' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y la rama especificadas
+                git url: "https://${GIT_REPO_URL}", branch: 'master' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y la rama especificadas
                 echo WORKSPACE
                 echo NODE_NAME
                 stash name:'code', includes:'**'
