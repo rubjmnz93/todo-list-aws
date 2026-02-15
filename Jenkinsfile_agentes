@@ -8,10 +8,6 @@ pipeline {
         GIT_REPO_URL = 'github.com/rubjmnz93/todo-list-aws.git' // URL del repositorio Git, configurada como variable de entorno en Jenkins para mayor flexibilidad
     }
 
-    parameters {
-        string(name: 'BASE_URL', defaultValue: '', description: 'URL base de la API desplegada en AWS') // Parámetro para almacenar la URL base de la API desplegada
-    }
-
     stages {
 
         stage('Get Code') {
@@ -83,7 +79,7 @@ pipeline {
             }
         }
         stage('Rest Tests'){
-            agent { label 'agent1'} // Especificar que se ejecute con el agente 1
+            agent { label 'agent2'} // Especificar que se ejecute con el agente 1
             steps{
                 script {
                     sh 'whoami'
