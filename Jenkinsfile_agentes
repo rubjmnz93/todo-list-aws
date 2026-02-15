@@ -75,8 +75,8 @@ pipeline {
                 echo NODE_NAME
                 echo 'Initiating Deployment wit SAM'
                 sh "bash pipelines/common-steps/deploy.sh" // Ejecutar el script de despliegue para desplegar la aplicación utilizando AWS SAM, lo que implementa la aplicación en el entorno de staging de AWS
-                env.BASE_URL = sh( script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text",
-                        returnStdout: true) // Ejecutar un comando de AWS CLI para obtener la URL base de la API desplegada en AWS, utilizando el nombre del stack y la región especificados
+                // Ejecutar un comando de AWS CLI para obtener la URL base de la API desplegada en AWS, utilizando el nombre del stack y la región especificados
+                env.BASE_URL = sh( script: "aws cloudformation describe-stacks --stack-name todo-list-aws-staging --query 'Stacks[0].Outputs[?OutputKey==`BaseUrlApi`].OutputValue' --region us-east-1 --output text", returnStdout: true)
                 echo "${env.BASE_URL}" // Imprimir la URL base obtenida
             }
         }
