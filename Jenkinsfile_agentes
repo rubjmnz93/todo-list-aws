@@ -50,6 +50,7 @@ pipeline {
                     recordIssues tools: [flake8(pattern: 'flake8.out')] // Publicar los resultados del análisis estático de flake8 utilizando el plugin Warnings Next Generation, buscando los archivos flake8.out generados por el script de análisis estático
                     recordIssues tools: [pyLint(name: 'Bandit', pattern: 'bandit.out')] // Publicar los resultados del análisis estático de Bandit utilizando el plugin Warnings Next Generation, buscando los archivos bandit.out generados por el script de análisis estático
                     junit 'result-unit.xml' // Publicar los resultados de las pruebas unitarias utilizando el plugin JUnit, buscando los archivos result-unit.xml generados por pytest. Esto permitirá visualizar los resultados de las pruebas en Jenkins y marcar la construcción como fallida si alguna prueba falla
+                    cleanWs() // Limpiar el espacio de trabajo
                 }
             }
         }
@@ -98,6 +99,7 @@ pipeline {
             post {
                 always {
                     junit 'result-integration.xml' // Publicar los resultados de las pruebas de integración utilizando el plugin JUnit
+                    cleanWs() // Limpiar el espacio de trabajo
                 }
             }
         }
