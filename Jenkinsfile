@@ -14,6 +14,8 @@ pipeline {
             steps {
                 echo 'Checkout code from GitHub'
                 git url: "https://${GIT_REPO_URL}", branch: 'master' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y el tag de release
+                echo 'Get SAM configuration file'
+                sh 'wget https://raw.githubusercontent.com/rubjmnz93/todo-list-aws-config/refs/heads/${ENVIRONMENT}/samconfig.toml'
             }
         }
         
