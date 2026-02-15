@@ -18,8 +18,8 @@ pipeline {
                 echo NODE_NAME
                 echo 'Checkout code from GitHub'
                 git url: "https://${GIT_REPO_URL}", branch: 'develop' // Realizar el checkout del código desde el repositorio GitHub, utilizando la URL y la rama especificadas
-                echo WORKSPACE
-                echo NODE_NAME
+                echo 'Get SAM configuration file'
+                sh 'wget https://raw.githubusercontent.com/rubjmnz93/todo-list-aws-config/refs/heads/${ENVIRONMENT}/samconfig.toml'
                 stash name:'code', includes:'**'
             }
         }
