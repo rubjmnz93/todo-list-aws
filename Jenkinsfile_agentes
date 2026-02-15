@@ -83,6 +83,7 @@ pipeline {
             }
         }
         stage('Rest Tests'){
+            agent { label 'agent1'} // Especificar que se ejecute con el agente 1
             steps{
                 script {
                     sh 'whoami'
